@@ -131,15 +131,12 @@ def run_inference():
     patch_size = 32
     threshold = 0.6
 
-    print("Loading MRC file...")
     density, voxel_size = load_unseen_mrc(mrc_path)
 
-    print("Loading trained model...")
     #model = VoxelNet()
     model = DeepMultiResNet()
     model.load_state_dict(torch.load(model_path, map_location="cuda"))
 
-    print("Running inference...")
     pred_coords = predict_p_atoms(model, density, voxel_size, patch_size, threshold)
 
     print(f"Writing {len(pred_coords)} predicted P atoms to: {output_cif_path}")
@@ -148,6 +145,7 @@ def run_inference():
 
 if __name__ == "__main__":
     run_inference()
+
 
 
 
