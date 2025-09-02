@@ -75,7 +75,7 @@ def coord_from_voxel(voxel, voxel_size):
         coord[i] = voxel[i] * voxel_size[i]
     return coord
 
-def predict_p_atoms(model, density, voxel_size, patch_size=32, threshold=0.5):
+def predict_p_atoms(model, density, voxel_size, patch_size=32):
     device = torch.device("cuda")
     model = model.to(device)
     model.eval()
@@ -145,6 +145,7 @@ def run_inference():
 
 if __name__ == "__main__":
     run_inference()
+
 
 
 
