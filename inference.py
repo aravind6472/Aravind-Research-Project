@@ -12,7 +12,6 @@ from Bio.PDB import PDBIO, StructureBuilder
 from torch.cuda.amp import autocast
 from Bio.PDB import MMCIFIO
 
-# --- Define your VoxelNet model (must match training definition) ---
 class VoxelNet(nn.Module):
     def __init__(self):
         super().__init__()
@@ -118,3 +117,4 @@ def run_inference():
 
 if __name__ == "__main__":
     run_inference()
+
