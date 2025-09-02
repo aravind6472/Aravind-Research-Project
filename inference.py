@@ -12,37 +12,51 @@ from Bio.PDB import PDBIO, StructureBuilder
 from torch.cuda.amp import autocast
 from Bio.PDB import MMCIFIO
 
-class VoxelNet(nn.Module):
-    def __init__(self):
+# class VoxelNet(nn.Module):
+#     def __init__(self):
+#         super().__init__()
+#         self.net = nn.Sequential(
+#             nn.Conv3d(1, 16, 3, padding=1),
+#             nn.ReLU(),
+#             nn.Conv3d(16, 32, 3, padding=1),
+#             nn.ReLU(),
+#             nn.Conv3d(32, 1, 1),
+#         )
+
+    # def forward(self, x):
+    #     return self.net(x)
+
+class DeepMultiResNet(nn.Module):
+    def__init__(selt):
         super().__init__()
-        self.net = nn.Sequential(
-            nn.Conv3d(1, 16, 3, padding=1),
-            nn.ReLU(),
-            nn.Conv3d(16, 32, 3, padding=1),
-            nn.ReLU(),
-            nn.Conv3d(32, 1, 1),
-        )
+        self.block1 = MultiResBlock(1, 32)
+        self.block2 = MultiResBlock(32, 64)
+        self.block3 = MultiResBlock(64, 64)
+        self.block4 = MultiResBlock(64, 64)
+        self.final_conv = nn.Conv3d(64, 1, kernel_size=1)
 
     def forward(self, x):
-        return self.net(x)
-
-# --- MRC loading and preprocessing ---
+        x = self.block1(x)
+        x = self.block2(x)
+        skip = x 
+        x = self.block3(x) + skip  
+        x = self.block4(x)
+        return self.final_conv(x)
+        
 def load_unseen_mrc(mrc_path):
     with mrcfile.open(mrc_path, permissive=True) as mrc:
         density = mrc.data.astype(np.float32)
         voxel_size = np.array([mrc.voxel_size.x, mrc.voxel_size.y, mrc.voxel_size.z], dtype=np.float32)
     density = (density - np.mean(density)) / (np.std(density) + 1e-5)
-    density = np.transpose(density, (2, 1, 0))  # Shape: (X, Y, Z)
+    density = np.transpose(density, (2, 1, 0))  
     return density, voxel_size
 
-# --- Convert voxel index to coordinate ---
 def coord_from_voxel(voxel, voxel_size):
     coord = np.zeros(3, dtype=np.float32)
     for i in range(3):
         coord[i] = voxel[i] * voxel_size[i]
     return coord
 
-# --- Inference on the full volume with sliding patches ---
 def predict_p_atoms(model, density, voxel_size, patch_size=32, threshold=0.5):
     device = torch.device("cuda")
     model = model.to(device)
@@ -76,7 +90,6 @@ def predict_p_atoms(model, density, voxel_size, patch_size=32, threshold=0.5):
 
     return pred_coords
 
-# --- Write coordinates to a PDB file ---
 def write_cif(pred_coords, cif_path):
     builder = StructureBuilder.StructureBuilder()
     builder.init_structure("PRED")
@@ -93,7 +106,6 @@ def write_cif(pred_coords, cif_path):
     io.set_structure(structure)
     io.save(cif_path)
 
-# --- Main entry point ---
 def run_inference():
     mrc_path = "/home/aravind6472/3UTR_all-original.mrc"
     model_path = "/home/aravind6472/trained_model.pt"
@@ -105,7 +117,8 @@ def run_inference():
     density, voxel_size = load_unseen_mrc(mrc_path)
 
     print("Loading trained model...")
-    model = VoxelNet()
+    #model = VoxelNet()
+    model = DeepMultiResNet()
     model.load_state_dict(torch.load(model_path, map_location="cuda"))
 
     print("Running inference...")
@@ -117,4 +130,5 @@ def run_inference():
 
 if __name__ == "__main__":
     run_inference()
+
 
