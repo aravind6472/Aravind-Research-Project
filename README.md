@@ -7,3 +7,5 @@ This research is significant because it leverages machine learning to reduce dep
 This project differentiates itself from existing work by focusing on RNA (rather than protein) and by designing an inference pipeline that removes the need for labelled data. 
 
 The expected outcomes are: a trained neural network capable of mapping density volumes to structural coordinates and an inference framework that predicts RNA structure from density maps alone. Ultimately, this project aims to contribute a novel computational approach that bridges experimental cryo-EM data with automated RNA modeling.
+
+The file hpc_analysis.py is designed to build a neural network and train it on multiple pairs of PDB and MRC files. The file inference.py then uses the trained model from hpc_analysis.py to take an input MRC file and predict its corresponding structure. Both scripts are still in preliminary stages, and I am actively working on improving them. Since I have been developing them on my local machine, there is currently no commit history reflected in this repository.
