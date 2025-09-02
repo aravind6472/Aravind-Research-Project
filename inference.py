@@ -26,6 +26,24 @@ from Bio.PDB import MMCIFIO
     # def forward(self, x):
     #     return self.net(x)
 
+class MultiResBlock(nn.Module):
+    def __init__(self,in_channels,out_channels):
+        super().__init__()
+        self.conv3 = nn.Conv3d(in_channels, out_channels, kernel_size = 3, padding = 1)
+        self.conv5 = nn.Conv3d(in_channels, out_channels, kernel_size = 5, padding = 2)
+        self.conv7 = nn.Conv3d(in_channels, out_channels, kernel_size = 7, padding = 3)
+        self.out_conv = nn.Conv3d(3*out_channels, out_channels, kernel_size = 1)
+        self.bn = nn.BatchNorm3d(out_channels)
+        self.relu = nn.ReLU()
+
+    def forward(self,x):
+        x3 = self.conv3(x)
+        x5 = self.conv5(x)
+        x7 = self.conv7(x)
+        merged = torch.cat([x3, x5, x7], dim=1)
+        out = self.out_conv(merged)
+        return self.relu(self.bn(out))
+
 class DeepMultiResNet(nn.Module):
     def __init__(self):
         super().__init__()
@@ -130,6 +148,7 @@ def run_inference():
 
 if __name__ == "__main__":
     run_inference()
+
 
 
 
