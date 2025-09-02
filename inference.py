@@ -27,7 +27,7 @@ from Bio.PDB import MMCIFIO
     #     return self.net(x)
 
 class DeepMultiResNet(nn.Module):
-    def__init__(self):
+    def __init__(self):
         super().__init__()
         self.block1 = MultiResBlock(1, 32)
         self.block2 = MultiResBlock(32, 64)
@@ -130,6 +130,7 @@ def run_inference():
 
 if __name__ == "__main__":
     run_inference()
+
 
 
 
